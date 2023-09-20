@@ -52,7 +52,7 @@
                                 Nombre es obligatorio.
                             </div>
                             <div v-if="tarjetaSeleccionada.nombre" class="valid-feedback">
-                                Es Correcto.
+                                Es Correcto, pero no funciono este mensaje
                             </div>
                         </div>
                     </div>
