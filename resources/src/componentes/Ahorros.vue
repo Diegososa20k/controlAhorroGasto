@@ -148,9 +148,11 @@ export default {
                 // Agrega la clase 'is-invalid' al campo correspondiente
                 document.getElementById('nombreInput').classList.add('is-invalid');
                 return; // Detiene la ejecución si hay errores de validación
-            } else if(!this.tarjetaSeleccionada.porcentaje){
-                document.getElementById('porcentajeInput').classList.add('is-invalid');
-            }else if(!this.tarjetaSeleccionada.descripcion){
+            }
+            //else if(!this.tarjetaSeleccionada.porcentaje){
+            //     document.getElementById('porcentajeInput').classList.add('is-invalid');
+            // }
+            else if(!this.tarjetaSeleccionada.descripcion){
                 document.getElementById('descripcionInput').classList.add('is-invalid');
             }
             else{
