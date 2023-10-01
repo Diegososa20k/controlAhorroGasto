@@ -24,6 +24,9 @@
                         <button @click="DeleteDialog(campo.id)" type="button" class="btn btn-danger btn-footer float-end">
                             <i class="mdi mdi-delete"></i>
                         </button>
+                        <button @click="EditarManual(campo.id, campo.resultadoAcumulado)" type="button" class="btn btn-success float-end btn-footer" data-bs-toggle="modal" data-bs-target="#miModal2">
+                            <i class="mdi mdi-square-inc-cash"></i>
+                        </button>
                     </footer>
                 </div>
             </div>
@@ -34,7 +37,7 @@
     <i class="mdi mdi-plus-box-outline"></i>
     </button>
 
-
+<!-- Modales -->
 
     <div class="modal fade" id="miModal" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
         <div class="modal-dialog">
@@ -80,11 +83,17 @@
                     <div class="form-check">
                         <input v-model="tarjetaSeleccionada.ahorro" class="form-check-input" type="checkbox" id="checkboxAhorro" required>
                         <label for="checkboxAhorro">Ahorro</label>
+                        <div v-if="tarjetaSeleccionada.ahorro && tarjetaSeleccionada.gasto" class="invalid-feedback">
+                            Solo puedes seleccionar un check.
+                        </div>
                     </div>
 
                     <div class="form-check">
                         <input v-model="tarjetaSeleccionada.gasto" class="form-check-input" type="checkbox" id="checkboxGasto" required >
                         <label for="checkboxGasto">Gasto</label>
+                        <div v-if="tarjetaSeleccionada.ahorro && tarjetaSeleccionada.gasto" class="invalid-feedback">
+                            Solo puedes seleccionar un check.
+                        </div>
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -95,6 +104,52 @@
             </div>
         </div>
     </div>
+
+
+    <div class="modal fade" id="miModal2" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Agrega cantidad de forma normal (importante no tener % en el card)</h5>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="form-floating mb-3">
+                        <input v-model="cantidadAnterior" class="form-control" type="number" placeholder="Cantidad Anterior" required>
+                        <label for="CantidadAnterior">Cantidad Anterior</label>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="form-floating mb-3">
+                        <input v-model="nuevaCantidad" class="form-control" type="number" placeholder="Nueva Cantidad" required>
+                        <label for="NuevaCantidad">Agregar Cantidad</label>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="form-floating mb-3">
+                        <button @click="CalcularTotal" type="button" class="btn btn-primary">Calcular</button>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="form-floating mb-3">
+                        <input v-model="resultadoAcumulado" class="form-control" type="number" placeholder="Nuevo Total" required id="nuevoTotal">
+                        <label for="nuevoTotal">Nuevo Total</label>
+                        <div v-if="!resultadoAcumulado > 0" class="invalid-feedback">
+                                La cantidad debe ser mayor a 0
+                            </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button @click="CancelarManual()" type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                <button @click="GuardarManual()" type="button" class="btn btn-primary" data-bs-dismiss="modal">Guardar Manual</button>
+            </div>
+        </div>
+    </div>
+</div>
 
 
 </template>
@@ -114,7 +169,10 @@ export default {
                 descripcion:'',
 
             },
+            cantidadAnterior: 0,
+            nuevaCantidad: 0,
             resultadoAcumulado: 0,
+            idSeleccionado: null,
             cantidadAgregar: 0,
             mostrarResultado: false,
             Acampos:[]
@@ -154,6 +212,10 @@ export default {
             // }
             else if(!this.tarjetaSeleccionada.descripcion){
                 document.getElementById('descripcionInput').classList.add('is-invalid');
+                return;
+            }else if(this.tarjetaSeleccionada.ahorro && this.tarjetaSeleccionada.gasto){
+                document.getElementById('gastoInput').classList.add('is-invalid');
+                document.getElementById('gastoInput').classList.add('is-invalid');
             }
             else{
                 // Crear un objeto con los datos que quieres enviar
@@ -163,6 +225,7 @@ export default {
                     ahorro: this.tarjetaSeleccionada.ahorro,
                     gasto: this.tarjetaSeleccionada.gasto,
                     descripcion: this.tarjetaSeleccionada.descripcion,
+                    resultadoAcumulado: this.resultadoAcumulado
                     //resultadoAcumulado: this.tarjetaSeleccionada.resultadoAcumulado  // Incluye resultadoAcumulado
 
                 };
@@ -175,6 +238,7 @@ export default {
                         console.log('Tarjeta actualizada correctamente');
                         this.CancelarDialog();
                         this.getDialog();
+                        this.resultadoAcumulado = '';
                     })
                     .catch(error => {
                         console.error('Error al actualizar la tarjeta', error);
@@ -192,6 +256,48 @@ export default {
                         console.error('Error al crear la tarjeta', error);
                     });
                 }
+            }
+        },
+
+        CancelarManual(){
+            this.resultadoAcumulado = 0
+        },
+
+        EditarManual(id, resultadoAcumulado) {
+            // Almacena el ID seleccionado y la cantidad anterior
+            this.idSeleccionado = id;
+            this.cantidadAnterior = resultadoAcumulado;
+            // Limpia los campos de nueva cantidad y resultado acumulado
+            this.nuevaCantidad = 0;
+            //this.resultadoAcumulado = 0;
+        },
+        CalcularTotal() {
+            // Realiza el cálculo y actualiza el resultado acumulado
+            this.resultadoAcumulado = parseFloat(this.cantidadAnterior) + parseFloat(this.nuevaCantidad);
+        },
+        GuardarManual() {
+
+            if (this.resultadoAcumulado > 0) {
+                const cantidad = this.resultadoAcumulado;
+
+            // Realiza una llamada a tu API para actualizar la cantidad de la tarjeta
+            axios.post(`/api/ahorros/actualizar-resultado-acumulado/${this.idSeleccionado}`, { resultadoAcumulado: cantidad })
+                .then(response => {
+                    this.getDialog();
+                    console.log('Cantidad guardada exitosamente.');
+                    // Cerrar la modal después de guardar
+                    //$('#miModal2').modal('hide');
+                })
+                .catch(error => {
+                    console.error('Error al guardar la cantidad:', error);
+                });
+
+            // Resetea el ID seleccionado después de guardar
+            this.idSeleccionado = null;
+            }else{
+                document.getElementById('nuevoTotal').classList.add('is-invalid');
+                return;
+                console.error('La cantidad debe ser mayor que 0. No se puede guardar.');
             }
         },
 

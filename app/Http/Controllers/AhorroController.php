@@ -37,6 +37,7 @@ class AhorroController extends Controller
         $ahorro->ahorro = $request->ahorro;
         $ahorro->gasto = $request->gasto;
         $ahorro->descripcion = $request->descripcion;
+        $ahorro->resultadoAcumulado = $request->resultadoAcumulado;
 
         $ahorro->save();
 
@@ -68,7 +69,7 @@ class AhorroController extends Controller
         $ahorro->ahorro = $request->ahorro;
         $ahorro->gasto = $request->gasto;
         $ahorro->descripcion = $request->descripcion;
-        // $ahorro->resultadoAcumulado = $request->resultadoAcumulado;
+        $ahorro->resultadoAcumulado = $request->resultadoAcumulado;
         $ahorro->update();
 
         return $ahorro;
@@ -103,6 +104,23 @@ class AhorroController extends Controller
 }
 
 
+public function actualizarResultadoAcumuladoUno(Request $request, $id)
+{
+    $request->validate([
+        'resultadoAcumulado' => 'required|numeric',
+    ]);
+
+    $ahorro = Ahorro::find($id);
+
+    if (!$ahorro) {
+        return response()->json(['message' => 'No se encontró el ahorro con el ID proporcionado'], 404);
+    }
+
+    $ahorro->resultadoAcumulado = $request->input('resultadoAcumulado');
+    $ahorro->save();
+
+    return response()->json(['message' => 'Campo resultadoAcumulado actualizado correctamente']);
+}
 
 
 }

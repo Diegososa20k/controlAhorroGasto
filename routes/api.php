@@ -21,4 +21,5 @@ use App\Http\Controllers\AhorroController;
 Route::apiResource('ahorros', AhorroController::class);
 Route::post('ahorros/actualizar-resultado-acumulado', [AhorroController::class, 'actualizarResultadoAcumulado']);
 
+Route::post('ahorros/actualizar-resultado-acumulado/{id}', [AhorroController::class, 'actualizarResultadoAcumuladoUno']);
 
