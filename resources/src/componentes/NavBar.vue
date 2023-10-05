@@ -14,11 +14,12 @@
 
 <style>
 .navbar {
-    background-color: #21DE4A;
+    background-color: #2F800D;
 }
 .navbar .titulo{
     color: aliceblue;
-    margin-left: 10px;
+    margin-left: 40px;
+
 }
 .mdi-content-save{
     margin-right: 50px;

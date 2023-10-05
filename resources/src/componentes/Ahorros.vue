@@ -5,9 +5,9 @@
             <label for="floatingInput">Cantidad a Agregar</label>
         </div>
 
-        <button @click="CantidadAgregar()" type="button" class="btn me-3">Agregar</button>
+        <button @click="CantidadAgregar()" type="button" class="btn btn-agregar me-3">Agregar</button>
 
-        <button @click="Guardar()" class="btn ms-auto"><i class="mdi mdi-content-save me-0" style="color: white; font-size: 30px;"></i></button>
+        <button @click="Guardar()" class="btn btn-agregar ms-auto"><i class="mdi mdi-content-save me-0" style="color: white; font-size: 30px;"></i></button>
     </div>
 
     <div class="row">
@@ -16,23 +16,24 @@
                     <h1 class="editTitulo">{{ campo.nombre }}</h1>
                     <h3 class="editTitulo">{{ campo.porcentaje }}%</h3>
                     <h4 class="editTitulo" v-if="mostrarResultado">C. Previa: ${{ campo.resultadoPrevio }}</h4>
-                    <h4 class="editTitulo">C. Acumulada: ${{ campo.resultadoAcumulado }}</h4>
+                    <h4 class="editTitulo">Total: ${{ campo.resultadoAcumulado }}</h4>
                     <footer>
-                        <button @click="EditarTarjeta(campo)" type="button" class="btn btn-success btn-footer float-end" data-bs-toggle="modal" data-bs-target="#miModal">
-                            <i class="mdi mdi-pencil-box-outline"></i>
-                        </button>
-                        <button @click="DeleteDialog(campo.id)" type="button" class="btn btn-danger btn-footer float-end">
+                        <button data-toggle="tooltip" title="Eliminar"  @click="DeleteDialog(campo.id)" type="button" class="btn btn-footer-eliminar float-end">
                             <i class="mdi mdi-delete"></i>
                         </button>
-                        <button @click="EditarManual(campo.id, campo.resultadoAcumulado)" type="button" class="btn btn-success float-end btn-footer" data-bs-toggle="modal" data-bs-target="#miModal2">
+                        <button data-toggle="tooltip" title="Editar Contenido" @click="EditarTarjeta(campo)" type="button" class="btn  btn-footer float-end" data-bs-toggle="modal" data-bs-target="#miModal">
+                            <i class="mdi mdi-pencil-box-outline"></i>
+                        </button>
+                        <button data-toggle="tooltip" title="Agrear Manualmente un monto" @click="EditarManual(campo.id, campo.resultadoAcumulado)" type="button" class="btn float-end btn-footer" data-bs-toggle="modal" data-bs-target="#miModal2">
                             <i class="mdi mdi-square-inc-cash"></i>
                         </button>
+
                     </footer>
                 </div>
             </div>
         </div>
 
-    <button type="button" class="btn btn-margen btn-cuadrangular position-fixed bottom-0 end-0"
+    <button type="button" class="btn btn-margen  btn-agregar btn-cuadrangular position-fixed bottom-0 end-0"
     data-bs-toggle="modal" data-bs-target="#miModal">
     <i class="mdi mdi-plus-box-outline"></i>
     </button>
@@ -71,12 +72,13 @@
                     </div>
 
                     <div class="row">
-                        <div class="form-floating mb-3">
-                            <input v-model="tarjetaSeleccionada.descripcion" class="form-control" type="text" placeholder="Descripcion" required id="descripcionInput" >
+                        <div class="mb-3">
                             <label for="descripcionInput">Descripcion</label>
                             <div v-if="!tarjetaSeleccionada.descripcion" class="invalid-feedback">
                                 descripcion es obligatorio.
                             </div>
+                            <textarea rows="3" v-model="tarjetaSeleccionada.descripcion" class="form-control" type="text" placeholder="Descripcion" required id="descripcionInput" ></textarea>
+
                         </div>
                     </div>
 
@@ -99,7 +101,7 @@
                 <div class="modal-footer">
                     <button @click="CancelarDialog()" type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
 
-                    <button @click="GuardarDialog()" type="button" class="btn btn-primary" >Guardar cambios</button>
+                    <button @click="GuardarDialog()" data-bs-dismiss="modal" type="button" class="btn btn-success" >Guardar cambios</button>
                 </div>
             </div>
         </div>
@@ -115,7 +117,7 @@
             <div class="modal-body">
                 <div class="row">
                     <div class="form-floating mb-3">
-                        <input v-model="cantidadAnterior" class="form-control" type="number" placeholder="Cantidad Anterior" required>
+                        <input readonly v-model="cantidadAnterior" class="form-control" type="number" placeholder="Cantidad Anterior" required>
                         <label for="CantidadAnterior">Cantidad Anterior</label>
                     </div>
                 </div>
@@ -135,7 +137,7 @@
 
                 <div class="row">
                     <div class="form-floating mb-3">
-                        <input v-model="resultadoAcumulado" class="form-control" type="number" placeholder="Nuevo Total" required id="nuevoTotal">
+                        <input readonly v-model="resultadoAcumulado" class="form-control" type="number" placeholder="Nuevo Total" required id="nuevoTotal">
                         <label for="nuevoTotal">Nuevo Total</label>
                         <div v-if="!resultadoAcumulado > 0" class="invalid-feedback">
                                 La cantidad debe ser mayor a 0
@@ -144,8 +146,8 @@
                 </div>
             </div>
             <div class="modal-footer">
-                <button @click="CancelarManual()" type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
-                <button @click="GuardarManual()" type="button" class="btn btn-primary" data-bs-dismiss="modal">Guardar Manual</button>
+                <button @click="CancelarManual()" type="button" class="btn btn-danger" data-bs-dismiss="modal">Cerrar</button>
+                <button @click="GuardarManual()" type="button" class="btn btn-success" data-bs-dismiss="modal">Guardar Manual</button>
             </div>
         </div>
     </div>
@@ -169,6 +171,7 @@ export default {
                 descripcion:'',
 
             },
+            esEdicion: false,
             cantidadAnterior: 0,
             nuevaCantidad: 0,
             resultadoAcumulado: 0,
@@ -184,6 +187,14 @@ export default {
 
     methods: {
         Guardar() {
+//              // Calcular la suma de los porcentajes
+//         const sumaPorcentajes = this.Acampos.reduce((total, campo) => total + parseFloat(campo.porcentaje), 0);
+
+// // Verificar si la suma es mayor al 100%
+// if (sumaPorcentajes > 100) {
+//     alert('La suma de los porcentajes no puede ser mayor al 100%.');
+//     return; // Detener la ejecución si la validación falla
+// }
             const actualizaciones = this.Acampos.map(campo => ({
                 id: campo.id,
                 resultadoAcumulado: campo.resultadoAcumulado
@@ -201,40 +212,62 @@ export default {
 
 
         GuardarDialog() {
-
             if (!this.tarjetaSeleccionada.nombre) {
                 // Agrega la clase 'is-invalid' al campo correspondiente
                 document.getElementById('nombreInput').classList.add('is-invalid');
                 return; // Detiene la ejecución si hay errores de validación
-            }
-            //else if(!this.tarjetaSeleccionada.porcentaje){
-            //     document.getElementById('porcentajeInput').classList.add('is-invalid');
-            // }
-            else if(!this.tarjetaSeleccionada.descripcion){
+            } else if (!this.tarjetaSeleccionada.porcentaje) {
+                document.getElementById('porcentajeInput').classList.add('is-invalid');
+                return;
+            } else if (!this.tarjetaSeleccionada.descripcion) {
                 document.getElementById('descripcionInput').classList.add('is-invalid');
                 return;
-            }else if(this.tarjetaSeleccionada.ahorro && this.tarjetaSeleccionada.gasto){
-                document.getElementById('gastoInput').classList.add('is-invalid');
-                document.getElementById('gastoInput').classList.add('is-invalid');
+            } else if (this.tarjetaSeleccionada.ahorro && this.tarjetaSeleccionada.gasto) {
+                document.getElementById('checkboxGasto').classList.add('is-invalid');
+                return;
             }
-            else{
-                // Crear un objeto con los datos que quieres enviar
-                const data = {
-                    nombre: this.tarjetaSeleccionada.nombre,
-                    porcentaje: this.tarjetaSeleccionada.porcentaje,
-                    ahorro: this.tarjetaSeleccionada.ahorro,
-                    gasto: this.tarjetaSeleccionada.gasto,
-                    descripcion: this.tarjetaSeleccionada.descripcion,
-                    resultadoAcumulado: this.resultadoAcumulado
-                    //resultadoAcumulado: this.tarjetaSeleccionada.resultadoAcumulado  // Incluye resultadoAcumulado
 
-                };
+            // Calcular la suma de los porcentajes
+            let sumaPorcentajes = this.Acampos.reduce((total, campo) => {
+                if (this.esEdicion && campo.id === this.tarjetaSeleccionada.id) {
+                    // Si estamos en edición, restamos el porcentaje anterior de la tarjeta editada
+                    return total;
+                }
+                return total + parseFloat(campo.porcentaje);
+            }, 0);
 
-                if (this.tarjetaSeleccionada.id) {
-                    // Si ya tienes una id, es una actualización (PUT)
-                    axios
-                    .put(`/api/ahorros/${this.tarjetaSeleccionada.id}`, data)
+            // Sumar el porcentaje actual
+            sumaPorcentajes += parseFloat(this.tarjetaSeleccionada.porcentaje);
+
+            // Verificar si la suma es mayor al 100%
+            if (sumaPorcentajes > 100) {
+                Swal.fire(
+                            'Error',
+                            'La suma de los porcentajes de las tarjetas no puede ser mayor al 100%',
+                            'error'
+                        );
+                        return;
+            }
+
+            const data = {
+                nombre: this.tarjetaSeleccionada.nombre,
+                porcentaje: this.tarjetaSeleccionada.porcentaje,
+                ahorro: this.tarjetaSeleccionada.ahorro,
+                gasto: this.tarjetaSeleccionada.gasto,
+                descripcion: this.tarjetaSeleccionada.descripcion,
+                resultadoAcumulado: this.resultadoAcumulado
+            };
+
+            if (this.esEdicion) {
+                // Si ya tienes una id y estamos en edición, es una actualización (PUT)
+                axios.put(`/api/ahorros/${this.tarjetaSeleccionada.id}`, data)
                     .then(response => {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Se actualizo la tarjeta con exito',
+                            showConfirmButton: false,
+                            timer: 1500
+                        })
                         console.log('Tarjeta actualizada correctamente');
                         this.CancelarDialog();
                         this.getDialog();
@@ -243,11 +276,16 @@ export default {
                     .catch(error => {
                         console.error('Error al actualizar la tarjeta', error);
                     });
-                } else {
-                    // Si no tienes una id, es una creación (POST)
-                    axios
-                    .post('/api/ahorros', data)
+            } else {
+                // Si no tienes una id, es una creación (POST)
+                axios.post('/api/ahorros', data)
                     .then(response => {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Se guardo la tarjeta con exito',
+                            showConfirmButton: false,
+                            timer: 1500
+                        })
                         console.log('Tarjeta creada correctamente');
                         this.CancelarDialog();
                         this.getDialog();
@@ -255,8 +293,17 @@ export default {
                     .catch(error => {
                         console.error('Error al crear la tarjeta', error);
                     });
-                }
             }
+
+            // Reinicializar la bandera de edición después de guardar
+            this.esEdicion = false;
+        },
+
+
+
+        calcularSumaPorcentajes() {
+            const sumaPorcentajes = this.Acampos.reduce((total, campo) => total + parseFloat(campo.porcentaje), 0);
+            return sumaPorcentajes;
         },
 
         CancelarManual(){
@@ -285,6 +332,13 @@ export default {
                 .then(response => {
                     this.getDialog();
                     console.log('Cantidad guardada exitosamente.');
+                    this.resultadoAcumulado = '';
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Se actualizo el total con exito',
+                        showConfirmButton: false,
+                        timer: 1500
+                    })
                     // Cerrar la modal después de guardar
                     //$('#miModal2').modal('hide');
                 })
@@ -295,6 +349,12 @@ export default {
             // Resetea el ID seleccionado después de guardar
             this.idSeleccionado = null;
             }else{
+                Swal.fire({
+                        icon: 'error',
+                        title: 'No se puede guardar si el Nuevo Total es 0',
+                        showConfirmButton: false,
+                        timer: 3000
+                    })
                 document.getElementById('nuevoTotal').classList.add('is-invalid');
                 return;
                 console.error('La cantidad debe ser mayor que 0. No se puede guardar.');
@@ -302,17 +362,32 @@ export default {
         },
 
         DeleteDialog(id) {
-        axios
-            .delete(`/api/ahorros/${id}`)
-            .then(response => {
-            console.log('Tarjeta eliminada correctamente');
-            // Aquí puedes actualizar tu vista para reflejar el cambio
-            // Por ejemplo, podrías eliminar la tarjeta de tu lista de tarjetas
-            this.Acampos = this.Acampos.filter(campo => campo.id !== id);
+            Swal.fire({
+            icon: 'warning',
+            title: 'Seguro quieres eliminar esta tarjeta  ?',
+            showDenyButton: true,
+            confirmButtonText: 'OK',
+            denyButtonText: `Cancelar`,
+            }).then((result) => {
+                /* Read more about isConfirmed, isDenied below */
+                if (result.isConfirmed) {
+                    Swal.fire('Eliminado!', '', 'success')
+                    axios
+                .delete(`/api/ahorros/${id}`)
+                .then(response => {
+                console.log('Tarjeta eliminada correctamente');
+                // Aquí puedes actualizar tu vista para reflejar el cambio
+                // Por ejemplo, podrías eliminar la tarjeta de tu lista de tarjetas
+                this.Acampos = this.Acampos.filter(campo => campo.id !== id);
+                })
+                .catch(error => {
+                console.error('Error al eliminar la tarjeta', error);
+                });
+            } else if (result.isDenied) {
+                Swal.fire('no se elimino', '', 'info')
+            }
             })
-            .catch(error => {
-            console.error('Error al eliminar la tarjeta', error);
-            });
+
         },
 
 
@@ -362,6 +437,7 @@ export default {
                 gasto: tarjeta.gasto === 1 ? true : false,
                 descripcion: tarjeta.descripcion,
             };
+            this.esEdicion = true;
             console.log('EditarTarjeta', this.tarjetaSeleccionada);
         },
 
@@ -381,6 +457,19 @@ export default {
 </script>
 
 <style>
+
+.btn-agregar:hover {
+    background-color: #28a745; /* Cambia este color al color deseado */
+    color: white; /* Cambia el color del texto al color deseado */
+}
+
+  /* Estilo para el botón al hacer clic (active) */
+.btn-agregar:active {
+    background-color: #28a745 !important; /* Cambia este color al color deseado (naranja) */
+    color: white; /* Cambia el color del texto al color deseado */
+}
+
+
 .card{
     margin: 10px;
 }
@@ -389,16 +478,21 @@ export default {
 }
 
 .card-ahorro{
-    background: linear-gradient(to bottom, #82FFBB, white);
+    background: linear-gradient(to bottom, #10a817	, #64DF85);
 }
 
 .card-gasto{
-    background: linear-gradient(to bottom, #FF8282, white);
+    background: linear-gradient(to bottom, #e03d2b, #FE7276);
 }
-.btn {
+/* .btn {
     color: aliceblue;
     background-color: #21DE4A;
     border-color: black;
+} */
+
+.btn-agregar{
+    background-color: #205D07;
+    color: azure;
 }
 
 .btn-margen {
@@ -406,16 +500,51 @@ export default {
     margin-bottom: 20px;
     line-height: 1;
     border-radius: 2;
+    border-radius: 100%;
 }
 
 .btn-footer{
-    margin-block-end: 10px;
-    margin-right: 10px;
+    color: white;
+    /* margin-block-end: 5px;
+    margin-right: 5px; */
+    background: linear-gradient(to bottom, #008500, #269926);
+}
+
+.btn-footer-eliminar{
+    background: linear-gradient(to bottom, #A62300, #BF4E30);
+    color: white;
 }
 
 .mdi-plus-box-outline{
     font-size: 50px;
 
+}
+
+.editTitulo{
+    color: white;
+}
+
+.btn-footer:hover {
+    background-color: #28a745; /* Cambia este color al color deseado */
+    color: white; /* Cambia el color del texto al color deseado */
+}
+
+  /* Estilo para el botón al hacer clic (active) */
+.btn-footer:active {
+    background-color: #28a745 !important; /* Cambia este color al color deseado (naranja) */
+    color: white; /* Cambia el color del texto al color deseado */
+}
+
+
+.btn-footer-eliminar:hover {
+    background-color: #28a745; /* Cambia este color al color deseado */
+    color: white; /* Cambia el color del texto al color deseado */
+}
+
+  /* Estilo para el botón al hacer clic (active) */
+.btn-footer-eliminar:active {
+    background-color: #28a745 !important; /* Cambia este color al color deseado (naranja) */
+    color: white; /* Cambia el color del texto al color deseado */
 }
 
 
